@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="el"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#071426"><meta name="color-scheme" content="dark"><meta name="apple-mobile-web-app-capable" content="yes">
+<title>SolitaireFunny — Πασιέντζα</title><style>
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:#071426;color:#e9f6ff;font:14px system-ui,-apple-system,"Segoe UI",sans-serif}body{background:radial-gradient(ellipse at 50% -20%,#164675,#071426 65%)}button{font:inherit;cursor:pointer;touch-action:manipulation}
+.shell{max-width:710px;margin:auto;padding:9px 9px 35px}.hero{text-align:center;background:linear-gradient(145deg,#16466d,#0b223b);border:1px solid #2b567c;border-radius:18px;padding:13px 7px;margin-bottom:9px}.hero-icon{font-size:25px;color:#9ad0ff;letter-spacing:9px;text-shadow:0 0 15px #2b9cf8}h1{font-size:clamp(21px,5vw,27px);margin:2px 0}.sub{color:#a1bbd6;margin:0;font-size:12px}.panel{border:1px solid #274a6d;border-radius:18px;background:#0c233bdc;padding:10px 6px 18px;box-shadow:0 10px 25px #0005}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:0 3px 9px}.metric{background:#102c4a;border:1px solid #326189;padding:7px;text-align:center;border-radius:10px}.metric small{color:#99b9d4;font-size:10px;display:block}.metric strong{display:block;font-variant-numeric:tabular-nums;font-size:18px}.tools{display:flex;justify-content:center;gap:5px;flex-wrap:wrap;margin:10px 2px}.btn{background:linear-gradient(135deg,#183f67,#102b46);border:1px solid #32638a;border-radius:10px;color:#e9f6ff;min-height:37px;padding:7px 11px}.btn.primary{background:linear-gradient(140deg,#227dbe,#134a7c);border-color:#7bc5ff}.btn:disabled{opacity:.38}.btn:focus-visible,.slot:focus-visible,.card:focus-visible{outline:2px solid #7de2ff;outline-offset:2px}.msg{min-height:24px;margin:5px;text-align:center;color:#b7d6ec;font-size:12px}.game{--w:calc((100% - 42px)/7);--h:calc(var(--w)*1.4);background:radial-gradient(ellipse at top,#16436b7d,#0a2037);border:1px solid #2e5979;border-radius:12px;padding:9px 4px 15px;min-height:570px;overflow:hidden}.top,.columns{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}.top{margin-bottom:16px}.slot{position:relative;aspect-ratio:5/7;border:1px dashed #5280a07a;border-radius:6px;min-width:0;text-align:center;color:#6e9ebc}.slot.foundation:empty:before{content:attr(data-suit);position:absolute;inset:0;display:grid;place-items:center;font-size:22px;opacity:.5}.slot.placeholder{border-color:transparent}.slot[role=button]{cursor:pointer}.stock{border:0}.stock button{width:100%;height:100%;border:1px solid #376d97;border-radius:6px;background:repeating-linear-gradient(145deg,#114473 0 7px,#2576ad 7px 10px,#114473 10px 17px);box-shadow:inset 0 0 0 3px #0a304f;color:#effbff;font-size:21px}.stock button.empty{background:#102c44;border:1px dashed #507c9a;box-shadow:none;color:#80aac7}.column{position:relative;min-height:420px;border-radius:6px;min-width:0}.column.empty{border:1px dashed #4b7a9a55}.card{position:absolute;left:0;top:0;width:100%;aspect-ratio:5/7;border:1px solid #bcc9d2;border-radius:6px;background:linear-gradient(145deg,#fff,#e0e8ec);color:#172a43;box-shadow:0 2px 6px #0007;text-align:left;display:flex;flex-direction:column;justify-content:space-between;padding:3px 2px;overflow:hidden;user-select:none;-webkit-user-select:none}.card.red{color:#ce3150}.card.back{border:1px solid #4e9ad3;background:repeating-linear-gradient(145deg,#124777 0 7px,#2273a5 7px 11px,#124777 11px 18px);box-shadow:inset 0 0 0 3px #082d4c,0 2px 5px #0008;pointer-events:none}.card .rank{font-weight:900;font-size:clamp(11px,2.7vw,18px)}.card .suit{font-size:clamp(11px,2.6vw,17px)}.card .big{align-self:center;font-size:clamp(16px,4.2vw,30px)}.card.selected{outline:3px solid #54ccff;outline-offset:1px;filter:drop-shadow(0 0 4px #43bdff)}.slot .card{height:100%}.column .card{height:auto;min-height:0}.foot{text-align:center;font-size:12px;color:#87a8c3;line-height:1.6;margin:14px 7px 0}@media(max-width:390px){.shell{padding-inline:5px}.game{padding-inline:3px}.top,.columns{gap:3px}.card{padding:2px}.btn{font-size:12px;padding:6px 8px}}@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style></head><body><main class="shell">
+<header class="hero"><div class="hero-icon">♠ ♥ ♣ ♦</div><h1>SolitaireFunny</h1><p class="sub">Πασιέντζα Klondike · Τράβηγμα 1 κάρτας</p></header>
+<section class="panel">
+<div class="stats"><div class="metric"><small>Χρόνος</small><strong id="clock">00:00</strong></div><div class="metric"><small>Κινήσεις</small><strong id="moves">0</strong></div><div class="metric"><small>Νίκες</small><strong id="wins">0</strong></div></div>
+<div class="tools"><button class="btn primary" id="new">↻ Νέο</button><button class="btn" id="undo">↶ Αναίρεση</button><button class="btn" id="hint">💡 Υπόδειξη</button><button class="btn" id="auto">⇧ Βάσεις</button></div>
+<p id="msg" class="msg" role="status" aria-live="polite">Διάλεξε κάρτα και μετά τη θέση που θέλεις να τη βάλεις.</p>
+<div class="game" id="game">
+<div class="top">
+<div class="slot stock" id="stock"><button id="draw" aria-label="Τράβηξε κάρτα">✦</button></div>
+<div class="slot" id="waste" data-zone="waste" role="button" tabindex="0" aria-label="Ανοιγμένες κάρτες"></div>
+<div class="slot placeholder"></div>
+<div class="slot foundation" id="f0" data-zone="f" data-col="0" role="button" tabindex="0" data-suit="♥" aria-label="Βάση κούπες"></div>
+<div class="slot foundation" id="f1" data-zone="f" data-col="1" role="button" tabindex="0" data-suit="♦" aria-label="Βάση καρό"></div>
+<div class="slot foundation" id="f2" data-zone="f" data-col="2" role="button" tabindex="0" data-suit="♣" aria-label="Βάση σπαθιά"></div>
+<div class="slot foundation" id="f3" data-zone="f" data-col="3" role="button" tabindex="0" data-suit="♠" aria-label="Βάση μπαστούνια"></div>
+</div><div class="columns" id="tableau"></div></div>
+<p class="foot">Πάτησε μια κάρτα και έπειτα μια στήλη ή βάση. Επιτρέπεται μετακίνηση ακολουθίας ανοιχτών καρτών. Διπλό πάτημα: αυτόματη μεταφορά στη βάση.</p>
+</section></main>
+<script>
+(function(){
+'use strict';
+const S=['♥','♦','♣','♠'],KEY='solitairefunny:v1',STATS='solitairefunny:stats',$=id=>document.getElementById(id);
+const clone=x=>JSON.parse(JSON.stringify(x)),color=c=>c.s<2?0:1,lab=c=>(c.v===1?'A':c.v===11?'J':c.v===12?'Q':c.v===13?'K':String(c.v))+S[c.s];
+let state,undo=[],pick=null,elapsed=0,since=0,active=true,stats={wins:0,best:null};
+try{stats=JSON.parse(localStorage.getItem(STATS)||'null')||stats;}catch(_){}
+function format(ms){let n=Math.floor(ms/1000);return String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0')}
+function now(){return elapsed+(since&&active&&!state.done?Date.now()-since:0)}
+function pause(){if(since){elapsed+=Date.now()-since;since=0;}save()}
+function resume(){if(active&&state&&!state.done&&!since)since=Date.now()}
+function save(){try{localStorage.setItem(KEY,JSON.stringify({state,elapsed:now()}))}catch(_){}}
+function say(v){$('msg').textContent=v}
+function snapshot(){undo.push({state:clone(state),elapsed:now()});if(undo.length>120)undo.shift()}
+function newGame(){
+const cards=Array.from({length:52},(_,i)=>({s:Math.floor(i/13),v:i%13+1,up:false}));
+for(let i=51;i>0;i--){const j=Math.floor(Math.random()*(i+1));[cards[i],cards[j]]=[cards[j],cards[i]];}
+state={t:Array.from({length:7},()=>[]),f:[[],[],[],[]],stock:[],waste:[],moves:0,done:false};
+for(let col=0;col<7;col++)for(let row=0;row<=col;row++){const c=cards.pop();c.up=row===col;state.t[col].push(c);}
+state.stock=cards;undo=[];elapsed=0;since=0;pick=null;say('Νέα παρτίδα! Επίλεξε κάρτα και μετά έναν προορισμό.');resume();draw();save();
+}
+function source(p){return p.zone==='t'?state.t[p.col]:p.zone==='w'?state.waste:state.f[p.col]}
+function pickedCards(p){return source(p).slice(p.index)}
+function validSequence(arr){return arr.every((c,i)=>c.up&&(i===0||(arr[i-1].v===c.v+1&&color(arr[i-1])!==color(c))))}
+function validMove(p,dest,col){const arr=pickedCards(p);if(!arr.length||!validSequence(arr))return false;if(p.zone===dest&&p.col===col)return false;
+if(dest==='t'){const a=state.t[col],last=a[a.length-1];return !last?arr[0].v===13: last.up&&last.v===arr[0].v+1&&color(last)!==color(arr[0]);}
+if(dest==='f'){return arr.length===1&&arr[0].s===col&&arr[0].v===(state.f[col].length+1)}
+return false;}
+function winIfComplete(){if(!state.done&&state.f.every(a=>a.length===13)){state.done=true;pause();stats.wins=(stats.wins||0)+1;stats.best=stats.best==null?elapsed:Math.min(stats.best,elapsed);try{localStorage.setItem(STATS,JSON.stringify(stats))}catch(_){}say('🏆 Συγχαρητήρια! Ολοκλήρωσες την πασιέντζα.');}}
+function move(p,dest,col){if(!validMove(p,dest,col))return false;snapshot();const src=source(p),taking=src.splice(p.index),target=dest==='t'?state.t[col]:state.f[col];target.push(...taking);
+if(p.zone==='t'&&src.length)src[src.length-1].up=true;
+state.moves++;pick=null;winIfComplete();draw();save();return true;}
+function choose(zone,col,index){const p={zone,col,index};const c=source(p)[index];if(!c||!c.up)return;pick=p;say('Επιλέχθηκε '+lab(c)+'. Διάλεξε προορισμό.');draw();}
+function select(zone,col,index){if(state.done)return;
+if(pick&&(['t','f'].includes(zone))&&move(pick,zone,col))return;
+if(zone==='w'){if(state.waste.length)choose('w',0,state.waste.length-1);return;}
+if(zone==='f'){if(state.f[col].length)choose('f',col,state.f[col].length-1);return;}
+if(zone==='t'&&state.t[col].length){const i=index??state.t[col].length-1;if(state.t[col][i].up)choose('t',col,i);return;}
+pick=null;draw();}
+function toFoundation(zone,col,index){const p={zone,col,index};const cards=pickedCards(p);if(cards.length!==1)return false;const target=cards[0].s;return move(p,'f',target)}
+function drawStock(){if(!state.stock.length&&!state.waste.length)return;snapshot();
+if(state.stock.length){const c=state.stock.pop();c.up=true;state.waste.push(c);}
+else {state.stock=state.waste.reverse().map(c=>({...c,up:false}));state.waste=[];}
+state.moves++;pick=null;draw();save();}
+function suitClass(c){return color(c)===0?' red':''}
+function cardElement(c,onClick,top,selected,down=false){
+const el=document.createElement('button');el.type='button';el.className='card'+(c.up?'':' back')+suitClass(c)+(selected?' selected':'');el.style.top=top+'px';
+el.setAttribute('aria-label',c.up?lab(c):'Κρυφή κάρτα');el.innerHTML=c.up?'<span class="rank">'+(c.v===1?'A':c.v===11?'J':c.v===12?'Q':c.v===13?'K':c.v)+'</span><span class="suit">'+S[c.s]+'</span><span class="big">'+S[c.s]+'</span>':'';
+el.addEventListener('click',e=>{e.stopPropagation();onClick()});if(down)el.style.pointerEvents='none';return el;}
+function draw(){
+$('clock').textContent=format(now());$('moves').textContent=String(state.moves);$('wins').textContent=String(stats.wins||0);$('undo').disabled=undo.length===0;
+$('draw').classList.toggle('empty',!state.stock.length);$('draw').textContent=state.stock.length?'✦':state.waste.length?'↻':'';
+const waste=$('waste');waste.replaceChildren();if(state.waste.length)waste.appendChild(cardElement(state.waste[state.waste.length-1],()=>select('w',0),0,pick?.zone==='w'));
+for(let i=0;i<4;i++){const pile=$('f'+i);pile.replaceChildren();const c=state.f[i].at(-1);if(c)pile.appendChild(cardElement(c,()=>select('f',i),0,pick?.zone==='f'&&pick.col===i));}
+const root=$('tableau');root.replaceChildren();
+const cw=Math.min(640,root.parentElement.clientWidth-10)/7-5,openStep=Math.max(21,Math.min(31,cw*.44)),downStep=Math.max(10,Math.min(18,cw*.25));
+for(let col=0;col<7;col++){
+const place=document.createElement('div');place.className='column'+(state.t[col].length?'':' empty');place.dataset.col=col;place.tabIndex=0;place.setAttribute('aria-label','Στήλη '+(col+1));place.addEventListener('click',()=>select('t',col));
+place.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();select('t',col);}});
+let y=0;state.t[col].forEach((c,i)=>{const chosen=pick?.zone==='t'&&pick.col===col&&i>=pick.index;const btn=cardElement(c,()=>select('t',col,i),y,chosen,!c.up);btn.style.zIndex=String(i+1);place.appendChild(btn);y+=c.up?openStep:downStep;});
+place.style.minHeight=Math.max(400,y+cw*1.5)+'px';root.appendChild(place);
+}
+}
+function hint(){for(const zone of ['w','t']){for(let col=0;col<(zone==='w'?1:7);col++){const a=zone==='w'?state.waste:state.t[col],i=a.length-1;if(i<0||!a[i].up)continue;const p={zone,col,index:i};if(validMove(p,'f',a[i].s)){say('💡 '+lab(a[i])+' → βάση '+S[a[i].s]);return;}}}
+for(let src=0;src<7;src++)for(let i=0;i<state.t[src].length;i++){const p={zone:'t',col:src,index:i};if(!validSequence(pickedCards(p)))continue;for(let dst=0;dst<7;dst++)if(dst!==src&&validMove(p,'t',dst)){say('💡 '+lab(state.t[src][i])+' → στήλη '+(dst+1));return;}}
+if(state.stock.length||state.waste.length)say('💡 Τράβηξε κάρτα από την τράπουλα.');else say('Δεν βρέθηκε διαθέσιμη κίνηση.');}
+function autoFoundation(){let changed=false;for(let tries=0;tries<52;tries++){let found=false;for(const zone of ['w','t']){for(let col=0;col<(zone==='w'?1:7);col++){const a=zone==='w'?state.waste:state.t[col],i=a.length-1;if(i>=0&&a[i].up&&validMove({zone,col,index:i},'f',a[i].s)){move({zone,col,index:i},'f',a[i].s);found=changed=true;break;}}if(found)break;}if(!found)break;}say(changed?'Μεταφέρθηκαν οι διαθέσιμες κάρτες στις βάσεις.':'Δεν υπάρχουν κάρτες για αυτόματη μεταφορά.');}
+$('draw').addEventListener('click',drawStock);
+$('new').addEventListener('click',()=>{if(state.moves&& !state.done&&!confirm('Νέα παρτίδα; Η τωρινή θα χαθεί.'))return;newGame()});
+$('undo').addEventListener('click',()=>{const old=undo.pop();if(!old)return;state=old.state;elapsed=old.elapsed;since=active&&!state.done?Date.now():0;pick=null;say('Η τελευταία κίνηση αναιρέθηκε.');draw();save();});
+$('hint').addEventListener('click',hint);$('auto').addEventListener('click',autoFoundation);
+$('waste').addEventListener('click',()=>select('w',0));for(let i=0;i<4;i++){$('f'+i).addEventListener('click',()=>select('f',i));}
+$('tableau').addEventListener('dblclick',e=>{let card=e.target.closest('.card');if(!card)return;});
+$('waste').addEventListener('dblclick',()=>{if(state.waste.length)toFoundation('w',0,state.waste.length-1)});
+for(let i=0;i<7;i++){} // Tableau double-tap uses click selection then Bases button.
+window.addEventListener('resize',()=>draw());
+function visibility(){active=document.visibilityState==='visible'&&embeddedActive;if(active)resume();else pause()}
+let embeddedActive=true;window.addEventListener('message',e=>{if(e.origin!==location.origin)return;if(e.data?.type==='solitairefunny:visibility'){embeddedActive=!!e.data.active;visibility();}});
+document.addEventListener('visibilitychange',visibility);
+try{const saved=JSON.parse(localStorage.getItem(KEY)||'null');if(saved?.state&&saved.state.t?.length===7&&saved.state.f?.length===4){state=saved.state;elapsed=Number(saved.elapsed)||0;resume();say('Η αποθηκευμένη παρτίδα συνεχίζεται.');draw();}else newGame();}catch(_){newGame();}
+setInterval(()=>{if(since&&active&&!state.done){$('clock').textContent=format(now());if(Math.floor(now()/1000)%8===0)save();}},400);
+})();
+</script></body></html>
