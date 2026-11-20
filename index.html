@@ -179,7 +179,7 @@ for(let src=0;src<7;src++)for(let i=0;i<state.t[src].length;i++){const p={zone:'
 if(state.stock.length||state.waste.length)say('💡 Τράβηξε κάρτα από την τράπουλα.');else say('Δεν βρέθηκε διαθέσιμη κίνηση.');}
 function autoFoundation(){let changed=false;for(let tries=0;tries<52;tries++){let found=false;for(const zone of ['w','t']){for(let col=0;col<(zone==='w'?1:7);col++){const a=zone==='w'?state.waste:state.t[col],i=a.length-1;if(i>=0&&a[i].up&&validMove({zone,col,index:i},'f',a[i].s)){move({zone,col,index:i},'f',a[i].s);found=changed=true;break;}}if(found)break;}if(!found)break;}say(changed?'Μεταφέρθηκαν οι διαθέσιμες κάρτες στις βάσεις.':'Δεν υπάρχουν κάρτες για αυτόματη μεταφορά.');}
 $('draw').addEventListener('click',drawStock);
-$('new').addEventListener('click',()=>{if(state.moves&& !state.done&&!confirm('Νέα παρτίδα; Η τωρινή θα χαθεί.'))return;newGame()});
+$('new').addEventListener('click',async()=>{if(state.moves&& !state.done&&!await GameDialog.confirm('Νέα παρτίδα; Η τωρινή θα χαθεί.'))return;newGame()});
 $('undo').addEventListener('click',()=>{const old=undo.pop();if(!old)return;state=old.state;elapsed=old.elapsed;since=active&&!state.done?Date.now():0;pick=null;say('Η τελευταία κίνηση αναιρέθηκε.');draw();save();});
 $('hint').addEventListener('click',hint);$('auto').addEventListener('click',autoFoundation);
 $('waste').addEventListener('click',()=>select('w',0));for(let i=0;i<4;i++){$('f'+i).addEventListener('click',()=>select('f',i));}
