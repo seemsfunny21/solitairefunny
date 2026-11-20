@@ -4,6 +4,29 @@
 <title>SolitaireFunny — Πασιέντζα</title><style>
 *{box-sizing:border-box}html,body{margin:0;min-height:100%;background:#071426;color:#e9f6ff;font:14px system-ui,-apple-system,"Segoe UI",sans-serif}body{background:radial-gradient(ellipse at 50% -20%,#164675,#071426 65%)}button{font:inherit;cursor:pointer;touch-action:manipulation}
 .shell{max-width:710px;margin:auto;padding:9px 9px 35px}.hero{text-align:center;background:linear-gradient(145deg,#16466d,#0b223b);border:1px solid #2b567c;border-radius:18px;padding:13px 7px;margin-bottom:9px}.hero-icon{font-size:25px;color:#9ad0ff;letter-spacing:9px;text-shadow:0 0 15px #2b9cf8}h1{font-size:clamp(21px,5vw,27px);margin:2px 0}.sub{color:#a1bbd6;margin:0;font-size:12px}.panel{border:1px solid #274a6d;border-radius:18px;background:#0c233bdc;padding:10px 6px 18px;box-shadow:0 10px 25px #0005}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:0 3px 9px}.metric{background:#102c4a;border:1px solid #326189;padding:7px;text-align:center;border-radius:10px}.metric small{color:#99b9d4;font-size:10px;display:block}.metric strong{display:block;font-variant-numeric:tabular-nums;font-size:18px}.tools{display:flex;justify-content:center;gap:5px;flex-wrap:wrap;margin:10px 2px}.btn{background:linear-gradient(135deg,#183f67,#102b46);border:1px solid #32638a;border-radius:10px;color:#e9f6ff;min-height:37px;padding:7px 11px}.btn.primary{background:linear-gradient(140deg,#227dbe,#134a7c);border-color:#7bc5ff}.btn:disabled{opacity:.38}.btn:focus-visible,.slot:focus-visible,.card:focus-visible{outline:2px solid #7de2ff;outline-offset:2px}.msg{min-height:24px;margin:5px;text-align:center;color:#b7d6ec;font-size:12px}.game{--w:calc((100% - 42px)/7);--h:calc(var(--w)*1.4);background:radial-gradient(ellipse at top,#16436b7d,#0a2037);border:1px solid #2e5979;border-radius:12px;padding:9px 4px 15px;min-height:570px;overflow:hidden}.top,.columns{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}.top{margin-bottom:16px}.slot{position:relative;aspect-ratio:5/7;border:1px dashed #5280a07a;border-radius:6px;min-width:0;text-align:center;color:#6e9ebc}.slot.foundation:empty:before{content:attr(data-suit);position:absolute;inset:0;display:grid;place-items:center;font-size:22px;opacity:.5}.slot.placeholder{border-color:transparent}.slot[role=button]{cursor:pointer}.stock{border:0}.stock button{width:100%;height:100%;border:1px solid #376d97;border-radius:6px;background:repeating-linear-gradient(145deg,#114473 0 7px,#2576ad 7px 10px,#114473 10px 17px);box-shadow:inset 0 0 0 3px #0a304f;color:#effbff;font-size:21px}.stock button.empty{background:#102c44;border:1px dashed #507c9a;box-shadow:none;color:#80aac7}.column{position:relative;min-height:420px;border-radius:6px;min-width:0}.column.empty{border:1px dashed #4b7a9a55}.card{position:absolute;left:0;top:0;width:100%;aspect-ratio:5/7;border:1px solid #bcc9d2;border-radius:6px;background:linear-gradient(145deg,#fff,#e0e8ec);color:#172a43;box-shadow:0 2px 6px #0007;text-align:left;display:flex;flex-direction:column;justify-content:space-between;padding:3px 2px;overflow:hidden;user-select:none;-webkit-user-select:none}.card.red{color:#ce3150}.card.back{border:1px solid #4e9ad3;background:repeating-linear-gradient(145deg,#124777 0 7px,#2273a5 7px 11px,#124777 11px 18px);box-shadow:inset 0 0 0 3px #082d4c,0 2px 5px #0008;pointer-events:none}.card .rank{font-weight:900;font-size:clamp(11px,2.7vw,18px)}.card .suit{font-size:clamp(11px,2.6vw,17px)}.card .big{align-self:center;font-size:clamp(16px,4.2vw,30px)}.card.selected{outline:3px solid #54ccff;outline-offset:1px;filter:drop-shadow(0 0 4px #43bdff)}.slot .card{height:100%}.column .card{height:auto;min-height:0}.foot{text-align:center;font-size:12px;color:#87a8c3;line-height:1.6;margin:14px 7px 0}@media(max-width:390px){.shell{padding-inline:5px}.game{padding-inline:3px}.top,.columns{gap:3px}.card{padding:2px}.btn{font-size:12px;padding:6px 8px}}@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* Compact the chrome around the seven card columns on mobile.
+   JS dynamically positions the tableau; leave its card geometry intact. */
+@media(max-width:600px){
+ .shell{padding:6px 5px 13px}
+ .hero{padding:6px 5px;margin-bottom:5px;border-radius:12px}
+ .hero-icon{font-size:17px;letter-spacing:5px;line-height:1.05}
+ .hero h1{font-size:19px;margin:2px 0}
+ .hero .sub{display:none}
+ .panel{padding:6px 4px 11px;border-radius:13px}
+ .stats{gap:5px;margin:0 1px 5px}
+ .metric{padding:4px 3px;border-radius:8px}
+ .metric small{font-size:9px}
+ .metric strong{font-size:16px}
+ .tools{margin:5px 1px;gap:4px;flex-wrap:nowrap}
+ .tools .btn{flex:1 1 0;min-width:0;min-height:34px;padding:5px 2px;font-size:clamp(10px,2.8vw,12px);white-space:nowrap}
+ .msg{min-height:19px;margin:3px 2px;font-size:11px;line-height:1.3}
+ .game{min-height:505px;padding:7px 3px 10px}
+ .top{margin-bottom:11px}
+ .top,.columns{gap:3px}
+ .foot{margin:7px 3px 0;font-size:11px}
+}
+
 </style></head><body><main class="shell">
 <header class="hero"><div class="hero-icon">♠ ♥ ♣ ♦</div><h1>SolitaireFunny</h1><p class="sub">Πασιέντζα Klondike · Τράβηγμα 1 κάρτας</p></header>
 <section class="panel">
