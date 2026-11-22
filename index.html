@@ -229,6 +229,9 @@ body>.suite-game-banner{width:min(calc(100% - 24px),720px);margin:12px auto 10px
  .solitaire-deck .suits{display:flex;justify-content:center;gap:15px;font-size:22px}
  .solitaire-deck .suits .red{color:#f187a4}
  .solitaire-deck .info{font-size:10px;line-height:1.4;color:#afcde1;text-align:center}
+ .solitaire-deck .side-new-game{width:100%;min-height:43px;
+  background:linear-gradient(130deg,#278bd2,#1761a3);border-color:#92ddff;
+  box-shadow:0 3px 9px #0005}
 }
 @media(orientation:portrait) and (max-width:650px) and (max-height:720px){
  .solitaire-deck{gap:5px}
@@ -260,6 +263,7 @@ body>.suite-game-banner{width:min(calc(100% - 24px),720px);margin:12px auto 10px
 <div class="suits" aria-hidden="true"><span class="red">♥ ♦</span><span>♣ ♠</span></div>
 <h2>Τράβηγμα φύλλων</h2>
 <div class="mode-buttons"><button type="button" data-draw="1" aria-pressed="true">1 φύλλο</button><button type="button" data-draw="3" aria-pressed="false">3 φύλλα</button></div>
+<button id="newSide" class="side-new-game" type="button">↻ Νέα παρτίδα</button>
 <div class="info">Η επιλογή αποθηκεύεται μαζί με την παρτίδα.</div>
 </aside></div>
 
@@ -362,6 +366,7 @@ for(const btn of document.querySelectorAll('[data-draw]')){
 }
 $('draw').addEventListener('click',drawStock);
 $('new').addEventListener('click',async()=>{if(state.moves&& !state.done&&!await GameDialog.confirm('Νέα παρτίδα; Η τωρινή θα χαθεί.'))return;newGame()});
+$('newSide').addEventListener('click',()=>$('new').click());
 $('undo').addEventListener('click',()=>{const old=undo.pop();if(!old)return;state=old.state;elapsed=old.elapsed;since=active&&!state.done?Date.now():0;pick=null;say('Η τελευταία κίνηση αναιρέθηκε.');draw();save();});
 $('hint').addEventListener('click',hint);$('auto').addEventListener('click',autoFoundation);
 $('waste').addEventListener('click',()=>select('w',0));for(let i=0;i<4;i++){$('f'+i).addEventListener('click',()=>select('f',i));}
@@ -380,7 +385,26 @@ setInterval(()=>{if(since&&active&&!state.done){$('clock').textContent=format(no
 <script>
 (()=>{
 const rules=["Στόχος: μετέφερε όλες τις κάρτες στις τέσσερις βάσεις, από άσο μέχρι ρήγα, ανά χρώμα/σύμβολο.","Στις επτά στήλες τοποθετείς κάρτες σε φθίνουσα σειρά με εναλλαγή κόκκινου και μαύρου.","Σε άδεια στήλη μπορεί να μπει μόνο ρήγας ή ακολουθία που ξεκινά από ρήγα.","Αποκάλυπτε τις κλειστές κάρτες μετακινώντας τις ανοιχτές. Τράβα από την τράπουλα όταν δεν υπάρχει χρήσιμη κίνηση.","Στις βάσεις μπαίνουν πρώτα οι άσοι, μετά τα 2, 3 κ.ο.κ. του ίδιου συμβόλου. Κερδίζεις όταν συμπληρωθούν και οι τέσσερις."];
-const style=document.createElement('style');style.textContent=`.funny-help-overlay{position:fixed;inset:0;z-index:2147483640;background:#020b19dc;display:flex;align-items:center;justify-content:center;padding:16px}.funny-help-overlay[hidden]{display:none!important}.funny-help-card{width:min(460px,100%);max-height:85dvh;overflow:auto;background:linear-gradient(155deg,#15395b,#091a30);color:#edf8ff;border:1px solid #68b9ed;border-radius:18px;padding:20px;box-shadow:0 15px 50px #0009;font:14px/1.55 system-ui,sans-serif}.funny-help-card h2{font-size:20px;margin:0 0 12px;text-align:center}.funny-help-card ol{padding-left:24px}.funny-help-card li{margin-bottom:10px}.funny-help-btn{background:#17486d;color:#e8f7ff;border:1px solid #67b9e6;border-radius:10px;padding:9px 12px;cursor:pointer;font:600 13px system-ui,sans-serif}.funny-help-close{display:block;width:100%;margin-top:12px}.funny-help-gear{position:absolute;right:12px;top:12px;font-size:22px}.funny-help-host{position:relative}`;document.head.append(style);
+const style=document.createElement('style');style.textContent=`.funny-help-overlay{position:fixed;inset:0;z-index:2147483640;background:#020b19dc;display:flex;align-items:center;justify-content:center;padding:16px}.funny-help-overlay[hidden]{display:none!important}.funny-help-card{width:min(460px,100%);max-height:85dvh;overflow:auto;background:linear-gradient(155deg,#15395b,#091a30);color:#edf8ff;border:1px solid #68b9ed;border-radius:18px;padding:20px;box-shadow:0 15px 50px #0009;font:14px/1.55 system-ui,sans-serif}.funny-help-card h2{font-size:20px;margin:0 0 12px;text-align:center}.funny-help-card ol{padding-left:24px}.funny-help-card li{margin-bottom:10px}.funny-help-btn{background:#17486d;color:#e8f7ff;border:1px solid #67b9e6;border-radius:10px;padding:9px 12px;cursor:pointer;font:600 13px system-ui,sans-serif}.funny-help-close{display:block;width:100%;margin-top:12px}.funny-help-gear{position:absolute;right:12px;top:12px;font-size:22px}.funny-help-host{position:relative}
+@media(orientation:portrait) and (max-width:650px){
+ .funny-help-overlay{
+  inset:auto!important;top:0!important;left:100vw!important;right:auto!important;bottom:auto!important;
+  width:100dvh!important;height:100vw!important;
+  transform-origin:top left!important;transform:rotate(90deg)!important;
+  padding:8px!important;box-sizing:border-box!important
+ }
+ .funny-help-card{
+  width:min(660px,calc(100% - 6px))!important;
+  max-height:calc(100% - 6px)!important;
+  padding:12px 18px!important;font-size:13px!important;
+  line-height:1.4!important
+ }
+ .funny-help-card h2{font-size:18px!important;margin-bottom:7px!important}
+ .funny-help-card ol{margin:5px 0!important;padding-left:23px!important}
+ .funny-help-card li{margin-bottom:6px!important}
+ .funny-help-close{margin-top:7px!important;min-height:34px}
+}
+`;document.head.append(style);
 const overlay=document.createElement('div');overlay.className='funny-help-overlay';overlay.hidden=true;overlay.setAttribute('role','presentation');const card=document.createElement('section');card.className='funny-help-card';card.setAttribute('role','dialog');card.setAttribute('aria-modal','true');card.setAttribute('aria-label','Πώς παίζεται');const title=document.createElement('h2');title.textContent='📖 Πώς παίζεται';const list=document.createElement('ol');for(const rule of rules){const li=document.createElement('li');li.textContent=rule;list.append(li)}const close=document.createElement('button');close.type='button';close.className='funny-help-btn funny-help-close';close.textContent='Επιστροφή στο παιχνίδι';card.append(title,list,close);overlay.append(card);document.body.append(overlay);let previous=null;function hide(){overlay.hidden=true;const target=previous;if(target?.isConnected&&target.getClientRects().length)target.focus();else document.querySelector('#settingsButton,#gear,.funny-help-gear')?.focus()}function show(){previous=document.activeElement;const settings=document.getElementById('settingsDialog');if(settings?.open)settings.close();const chess=document.getElementById('settings');if(chess)chess.hidden=true;overlay.hidden=false;close.focus()}close.addEventListener('click',hide);overlay.addEventListener('click',e=>{if(e.target===overlay)hide()});document.addEventListener('keydown',e=>{if(!overlay.hidden&&e.key==='Escape'){e.stopPropagation();hide()}});
 const settings=document.getElementById('settingsDialog')||document.getElementById('settings');const btn=document.createElement('button');btn.type='button';btn.className='funny-help-btn';btn.textContent='📖 Πώς παίζεται';btn.addEventListener('click',show);if(settings){const form=settings.querySelector('form')||settings.querySelector('.dialog')||settings;const last=form.querySelector('button:last-of-type');if(last)last.before(btn);else form.append(btn)}else{const hero=document.querySelector('.hero')||document.querySelector('header')||document.body;hero.classList.add('funny-help-host');const gear=document.createElement('button');gear.type='button';gear.className='funny-help-btn funny-help-gear';gear.textContent='⚙';gear.setAttribute('aria-label','Οδηγίες παιχνιδιού');gear.title='Πώς παίζεται';gear.addEventListener('click',show);hero.append(gear)}
 })();
