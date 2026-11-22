@@ -183,6 +183,10 @@ body>.suite-game-banner{width:min(calc(100% - 24px),720px);margin:12px auto 10px
    width:min(60px,calc(100% - 4px))!important;
  }
 
+  /* Three-card Klondike visibly fans the waste cards on portrait phones. */
+  #waste .card.waste-fan{left:50%!important;width:min(48px,calc(100% - 16px))!important;
+   transform:translateX(calc(-50% + var(--waste-shift,0px)))!important;padding:2px!important}
+  #waste .card.waste-fan .big{font-size:17px!important}
  .game-dialog-cover{position:fixed;top:0;left:100vw;right:auto;bottom:auto;
    width:100dvh;height:100vw;transform-origin:top left;transform:rotate(90deg)}
 }
@@ -238,10 +242,13 @@ body>.suite-game-banner{width:min(calc(100% - 24px),720px);margin:12px auto 10px
  .solitaire-deck button{min-height:35px;padding:5px}
  .solitaire-deck h2{font-size:13px}
 }
+#waste .card.waste-fan{left:8px;width:calc(100% - 16px);transform:translateX(var(--waste-shift,0px))}
+#waste .card.waste-fan:not(.waste-front){pointer-events:none;filter:brightness(.88)}
+#waste .card.waste-front{z-index:3}
 </style>
 </head><body><main class="shell">
 <div class="suite-game-banner"><img src="./hero-banner.svg" width="900" height="300" alt="" aria-hidden="true" decoding="async"></div>
-<header class="hero"><div class="hero-icon">♠ ♥ ♣ ♦</div><h1>SolitaireFunny</h1><p class="sub">Πασιέντζα Klondike · Τράβηγμα 1 κάρτας</p></header>
+<header class="hero"><div class="hero-icon">♠ ♥ ♣ ♦</div><h1>SolitaireFunny</h1><p class="sub" id="modeSummary">Πασιέντζα Klondike · Τράβηγμα 1 κάρτας</p></header>
 <section class="panel">
 <div class="stats"><div class="metric"><small>Χρόνος</small><strong id="clock">00:00</strong></div><div class="metric"><small>Κινήσεις</small><strong id="moves">0</strong></div><div class="metric"><small>Νίκες</small><strong id="wins">0</strong></div></div>
 <div class="tools"><button class="btn primary" id="new">↻ Νέο</button><button class="btn" id="undo">↶ Αναίρεση</button><button class="btn" id="hint">💡 Υπόδειξη</button><button class="btn" id="auto">⇧ Βάσεις</button><span class="draw-mode-toolbar"><button type="button" class="btn" data-draw="1" aria-pressed="true">1 φύλλο</button><button type="button" class="btn" data-draw="3" aria-pressed="false">3 φύλλα</button></span></div>
@@ -336,9 +343,29 @@ const foundations=state.f.reduce((sum,pile)=>sum+pile.length,0);
 for(const p of document.querySelectorAll('.foundation-count'))p.textContent=foundations+'/52';
 for(const p of document.querySelectorAll('.stock-count'))p.textContent=String(state.stock.length);
 for(const p of document.querySelectorAll('.foundation-progress'))p.style.width=(foundations/52*100)+'%';
+$('modeSummary').textContent='Πασιέντζα Klondike · Τράβηγμα '+(state.drawCount===3?'3 φύλλων':'1 φύλλου');
 $('clock').textContent=format(now());$('moves').textContent=String(state.moves);$('wins').textContent=String(stats.wins||0);$('undo').disabled=undo.length===0;
 $('draw').classList.toggle('empty',!state.stock.length);$('draw').textContent=state.stock.length?'✦':state.waste.length?'↻':'';
-const waste=$('waste');waste.replaceChildren();if(state.waste.length)waste.appendChild(cardElement(state.waste[state.waste.length-1],()=>select('w',0),0,pick?.zone==='w'));
+const waste=$('waste');waste.replaceChildren();
+const visibleCount=Math.min(state.drawCount===3?3:1,state.waste.length);
+waste.setAttribute('aria-label',visibleCount
+  ? 'Ανοιγμένες κάρτες: '+visibleCount+' · Τράβηγμα ανά '+state.drawCount+' φύλλα'
+  : 'Κενή θέση ανοιγμένων καρτών');
+if(visibleCount){
+ const recent=state.waste.slice(-visibleCount);
+ recent.forEach((c,i)=>{
+   const front=i===recent.length-1;
+   const card=cardElement(c,()=>{if(front)select('w',0)},0,front&&pick?.zone==='w',!front);
+   if(state.drawCount===3){
+     card.classList.add('waste-fan');
+     card.style.setProperty('--waste-shift',(i-(recent.length-1)/2)*8+'px');
+   }
+   if(front)card.classList.add('waste-front');
+   else{card.tabIndex=-1;card.setAttribute('aria-hidden','true');}
+   card.style.zIndex=String(i+1);
+   waste.appendChild(card);
+ });
+}
 for(let i=0;i<4;i++){const pile=$('f'+i);pile.replaceChildren();const c=state.f[i].at(-1);if(c)pile.appendChild(cardElement(c,()=>select('f',i),0,pick?.zone==='f'&&pick.col===i));}
 const root=$('tableau');root.replaceChildren();
 const cw=Math.min(640,root.parentElement.clientWidth-10)/7-5,openStep=Math.max(21,Math.min(31,cw*.44)),downStep=Math.max(10,Math.min(18,cw*.25));
