@@ -140,6 +140,15 @@ body>.suite-game-banner{width:min(calc(100% - 24px),720px);margin:12px auto 10px
  .card .rank{font-size:15px}
  .card .suit{font-size:14px}
  .card .big{font-size:23px}
+ /* Clearer tableau in the short edge of portrait phones: reveal each
+    card's rank and suit and keep individual cards visually distinct. */
+ .columns{gap:7px}
+ .column .card{left:3%;width:94%;max-height:96px;
+   border-radius:8px;box-shadow:0 2px 6px #0009}
+ .top .slot{border-radius:8px}
+ .top .slot .card{left:3%;width:94%;border-radius:8px}
+ .game{padding-inline:7px}
+
  .game-dialog-cover{position:fixed;top:0;left:100vw;right:auto;bottom:auto;
    width:100dvh;height:100vw;transform-origin:top left;transform:rotate(90deg)}
 }
