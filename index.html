@@ -269,7 +269,10 @@ body>.suite-game-banner{width:min(calc(100% - 24px),720px);margin:12px auto 10px
 'use strict';
 const S=['♥','♦','♣','♠'],KEY='solitairefunny:v1',STATS='solitairefunny:stats',$=id=>document.getElementById(id);
 const clone=x=>JSON.parse(JSON.stringify(x)),color=c=>c.s<2?0:1,lab=c=>(c.v===1?'A':c.v===11?'J':c.v===12?'Q':c.v===13?'K':String(c.v))+S[c.s];
-let state,undo=[],pick=null,elapsed=0,since=0,active=true,stats={wins:0,best:null},drawMode=1;
+const DRAW_SETTING='solitairefunny:nextDrawCount';
+let drawMode=1;
+try{drawMode=Number(localStorage.getItem(DRAW_SETTING))===3?3:1;}catch(_){}
+let state,undo=[],pick=null,elapsed=0,since=0,active=true,stats={wins:0,best:null};
 try{stats=JSON.parse(localStorage.getItem(STATS)||'null')||stats;}catch(_){}
 function format(ms){let n=Math.floor(ms/1000);return String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0')}
 function now(){return elapsed+(since&&active&&!state.done?Date.now()-since:0)}
@@ -318,9 +321,12 @@ const el=document.createElement('button');el.type='button';el.className='card'+(
 el.setAttribute('aria-label',c.up?lab(c):'Κρυφή κάρτα');el.innerHTML=c.up?'<span class="rank">'+(c.v===1?'A':c.v===11?'J':c.v===12?'Q':c.v===13?'K':c.v)+'</span><span class="suit">'+S[c.s]+'</span><span class="big">'+S[c.s]+'</span>':'';
 el.addEventListener('click',e=>{e.stopPropagation();onClick()});if(down)el.style.pointerEvents='none';return el;}
 function draw(){
-drawMode=state.drawCount===3?3:1;
 for(const b of document.querySelectorAll('[data-draw]')){
  b.setAttribute('aria-pressed',String(Number(b.dataset.draw)===drawMode));
+ b.title='Επιλογή για την επόμενη νέα παρτίδα';
+}
+for(const info of document.querySelectorAll('.solitaire-deck .info')){
+ info.textContent='Τώρα: '+(state.drawCount===3?'3 φύλλα':'1 φύλλο')+' · Επόμενη παρτίδα: '+drawMode+(drawMode===1?' φύλλο':' φύλλα');
 }
 const foundations=state.f.reduce((sum,pile)=>sum+pile.length,0);
 for(const p of document.querySelectorAll('.foundation-count'))p.textContent=foundations+'/52';
@@ -346,8 +352,10 @@ function autoFoundation(){let changed=false;for(let tries=0;tries<52;tries++){le
 function chooseDrawMode(n){
  if(state.done)return;
  if(n!==1&&n!==3)return;
- state.drawCount=n;drawMode=n;draw();save();
- say('Τράβηγμα ανά '+n+(n===1?' φύλλο.':' φύλλα.'));
+ drawMode=n;
+ try{localStorage.setItem(DRAW_SETTING,String(n));}catch(_){}
+ draw();
+ say('Αποθηκεύτηκε: '+n+(n===1?' φύλλο':' φύλλα')+' στην επόμενη νέα παρτίδα. Η τωρινή δεν αλλάζει.');
 }
 for(const btn of document.querySelectorAll('[data-draw]')){
  btn.addEventListener('click',()=>chooseDrawMode(Number(btn.dataset.draw)));
@@ -364,7 +372,7 @@ window.addEventListener('resize',()=>draw());
 function visibility(){active=document.visibilityState==='visible'&&embeddedActive;if(active)resume();else pause()}
 let embeddedActive=true;window.addEventListener('message',e=>{if(e.origin!==location.origin)return;if(e.data?.type==='solitairefunny:visibility'){embeddedActive=!!e.data.active;visibility();}});
 document.addEventListener('visibilitychange',visibility);
-try{const saved=JSON.parse(localStorage.getItem(KEY)||'null');if(saved?.state&&saved.state.t?.length===7&&saved.state.f?.length===4){state=saved.state;state.drawCount=state.drawCount===3?3:1;drawMode=state.drawCount;elapsed=Number(saved.elapsed)||0;resume();say('Η αποθηκευμένη παρτίδα συνεχίζεται.');draw();}else newGame();}catch(_){newGame();}
+try{const saved=JSON.parse(localStorage.getItem(KEY)||'null');if(saved?.state&&saved.state.t?.length===7&&saved.state.f?.length===4){state=saved.state;state.drawCount=state.drawCount===3?3:1;elapsed=Number(saved.elapsed)||0;resume();say('Η αποθηκευμένη παρτίδα συνεχίζεται.');draw();}else newGame();}catch(_){newGame();}
 setInterval(()=>{if(since&&active&&!state.done){$('clock').textContent=format(now());if(Math.floor(now()/1000)%8===0)save();}},400);
 })();
 </script>
