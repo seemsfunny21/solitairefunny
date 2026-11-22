@@ -169,6 +169,20 @@ body>.suite-game-banner{width:min(calc(100% - 24px),720px);margin:12px auto 10px
  .column .card .suit,.top .card .suit{font-size:13px!important}
  .column .card .big,.top .card .big{font-size:19px!important}
  .column .card.selected{transform:translateX(-50%)}
+ /* Phone landscape felt: seven compact card columns stay together on the
+    left. Preserve 60x84 cards, leave the remaining width empty on the right. */
+ .top,.columns{
+   width:min(100%,460px)!important;max-width:460px!important;
+   grid-template-columns:repeat(7,minmax(0,64px))!important;
+   gap:2px!important;align-self:flex-start!important;
+ }
+ .column .card{
+   width:min(60px,calc(100% - 4px))!important;
+ }
+ .top .slot .card{
+   width:min(60px,calc(100% - 4px))!important;
+ }
+
  .game-dialog-cover{position:fixed;top:0;left:100vw;right:auto;bottom:auto;
    width:100dvh;height:100vw;transform-origin:top left;transform:rotate(90deg)}
 }
