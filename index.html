@@ -283,7 +283,7 @@ const clone=x=>JSON.parse(JSON.stringify(x)),color=c=>c.s<2?0:1,lab=c=>(c.v===1?
 const DRAW_SETTING='solitairefunny:nextDrawCount';
 let drawMode=1;
 try{drawMode=Number(localStorage.getItem(DRAW_SETTING))===3?3:1;}catch(_){}
-let state,undo=[],pick=null,elapsed=0,since=0,active=true,stats={wins:0,best:null};
+let state,undo=[],pick=null,lastCardTap=null,elapsed=0,since=0,active=true,stats={wins:0,best:null};
 try{stats=JSON.parse(localStorage.getItem(STATS)||'null')||stats;}catch(_){}
 function format(ms){let n=Math.floor(ms/1000);return String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0')}
 function now(){return elapsed+(since&&active&&!state.done?Date.now()-since:0)}
@@ -292,12 +292,43 @@ function resume(){if(active&&state&&!state.done&&!since)since=Date.now()}
 function save(){try{localStorage.setItem(KEY,JSON.stringify({state,elapsed:now()}))}catch(_){}}
 function say(v){$('msg').textContent=v}
 function snapshot(){undo.push({state:clone(state),elapsed:now()});if(undo.length>120)undo.shift()}
+function cardKey(c){return c.s+':'+c.v}
+function blockedFromAuto(c){return (state.manualFoundationCards||[]).includes(cardKey(c))}
+function autoToFoundation(){
+ // Only exposed top cards in the tableau or waste are eligible.
+ // Respect cards the player deliberately retrieved from a foundation.
+ if(state.done)return 0;
+ let count=0;
+ for(let tries=0;tries<52;tries++){
+   let found=false;
+   for(const zone of ['w','t']){
+     for(let col=0;col<(zone==='w'?1:7);col++){
+       const pile=zone==='w'?state.waste:state.t[col],index=pile.length-1,c=pile[index];
+       if(!c||!c.up||blockedFromAuto(c))continue;
+       if(!validMove({zone,col,index},'f',c.s))continue;
+       pile.pop();
+       state.f[c.s].push(c);
+       if(zone==='t'&&pile.length)pile[pile.length-1].up=true;
+       state.moves++;count++;found=true;
+       break;
+     }
+     if(found)break;
+   }
+   if(!found)break;
+ }
+ return count;
+}
+function finishAction(){
+ pick=null;lastCardTap=null;
+ autoToFoundation();
+ winIfComplete();draw();save();
+}
 function newGame(){
 const cards=Array.from({length:52},(_,i)=>({s:Math.floor(i/13),v:i%13+1,up:false}));
 for(let i=51;i>0;i--){const j=Math.floor(Math.random()*(i+1));[cards[i],cards[j]]=[cards[j],cards[i]];}
-state={t:Array.from({length:7},()=>[]),f:[[],[],[],[]],stock:[],waste:[],moves:0,done:false,drawCount:drawMode};
+state={t:Array.from({length:7},()=>[]),f:[[],[],[],[]],stock:[],waste:[],moves:0,done:false,drawCount:drawMode,manualFoundationCards:[]};
 for(let col=0;col<7;col++)for(let row=0;row<=col;row++){const c=cards.pop();c.up=row===col;state.t[col].push(c);}
-state.stock=cards;undo=[];elapsed=0;since=0;pick=null;say('Νέα παρτίδα! Επίλεξε κάρτα και μετά έναν προορισμό.');resume();draw();save();
+state.stock=cards;undo=[];elapsed=0;since=0;pick=null;lastCardTap=null;say('Νέα παρτίδα! Τα διαθέσιμα φύλλα ανεβαίνουν αυτόματα στις βάσεις.');resume();finishAction();
 }
 function source(p){return p.zone==='t'?state.t[p.col]:p.zone==='w'?state.waste:state.f[p.col]}
 function pickedCards(p){return source(p).slice(p.index)}
@@ -307,9 +338,19 @@ if(dest==='t'){const a=state.t[col],last=a[a.length-1];return !last?arr[0].v===1
 if(dest==='f'){return arr.length===1&&arr[0].s===col&&arr[0].v===(state.f[col].length+1)}
 return false;}
 function winIfComplete(){if(!state.done&&state.f.every(a=>a.length===13)){state.done=true;pause();stats.wins=(stats.wins||0)+1;stats.best=stats.best==null?elapsed:Math.min(stats.best,elapsed);try{localStorage.setItem(STATS,JSON.stringify(stats))}catch(_){}say('🏆 Συγχαρητήρια! Ολοκλήρωσες την πασιέντζα.');}}
-function move(p,dest,col){if(!validMove(p,dest,col))return false;snapshot();const src=source(p),taking=src.splice(p.index),target=dest==='t'?state.t[col]:state.f[col];target.push(...taking);
-if(p.zone==='t'&&src.length)src[src.length-1].up=true;
-state.moves++;pick=null;winIfComplete();draw();save();return true;}
+function move(p,dest,col){if(!validMove(p,dest,col))return false;
+ snapshot();
+ const src=source(p),taking=src.splice(p.index),target=dest==='t'?state.t[col]:state.f[col];
+ target.push(...taking);
+ if(p.zone==='t'&&src.length)src[src.length-1].up=true;
+ if(p.zone==='f'&&dest==='t'){
+   // Do not immediately return a card that the player pulled down manually.
+   for(const c of taking)if(!blockedFromAuto(c))state.manualFoundationCards.push(cardKey(c));
+ }else{
+   // After a subsequent deliberate move, allow automatic foundation moves again.
+   for(const c of taking)state.manualFoundationCards=state.manualFoundationCards.filter(key=>key!==cardKey(c));
+ }
+ state.moves++;finishAction();return true;}
 function choose(zone,col,index){const p={zone,col,index};const c=source(p)[index];if(!c||!c.up)return;pick=p;say('Επιλέχθηκε '+lab(c)+'. Διάλεξε προορισμό.');draw();}
 function select(zone,col,index){if(state.done)return;
 if(pick&&(['t','f'].includes(zone))&&move(pick,zone,col))return;
@@ -317,7 +358,24 @@ if(zone==='w'){if(state.waste.length)choose('w',0,state.waste.length-1);return;}
 if(zone==='f'){if(state.f[col].length)choose('f',col,state.f[col].length-1);return;}
 if(zone==='t'&&state.t[col].length){const i=index??state.t[col].length-1;if(state.t[col][i].up)choose('t',col,i);return;}
 pick=null;draw();}
-function toFoundation(zone,col,index){const p={zone,col,index};const cards=pickedCards(p);if(cards.length!==1)return false;const target=cards[0].s;return move(p,'f',target)}
+function toFoundation(zone,col,index){
+ const p={zone,col,index},cards=pickedCards(p);
+ if(cards.length!==1)return false;
+ // A player's explicit double tap overrides manual auto-hold.
+ return move(p,'f',cards[0].s);
+}
+function tapCard(zone,col,index){
+ if(state.done)return;
+ const pile=zone==='w'?state.waste:state.t[col],c=pile[index];
+ if(!c||!c.up)return;
+ const timestamp=Date.now(),identity=cardKey(c),previous=lastCardTap;
+ if(previous&&previous.identity===identity&&timestamp-previous.time<=460){
+   lastCardTap=null;
+   if(toFoundation(zone,col,index))return;
+ }
+ lastCardTap={identity,time:timestamp};
+ select(zone,col,index);
+}
 function drawStock(){if(state.done||!state.stock.length&&!state.waste.length)return;snapshot();
 if(state.stock.length){
  const count=state.drawCount===3?3:1;
@@ -325,7 +383,7 @@ if(state.stock.length){
   const c=state.stock.pop();c.up=true;state.waste.push(c);
  }
 }else {state.stock=state.waste.reverse().map(c=>({...c,up:false}));state.waste=[];}
-state.moves++;pick=null;draw();save();}
+state.moves++;finishAction();}
 function suitClass(c){return color(c)===0?' red':''}
 function cardElement(c,onClick,top,selected,down=false){
 const el=document.createElement('button');el.type='button';el.className='card'+(c.up?'':' back')+suitClass(c)+(selected?' selected':'');el.style.top=top+'px';
@@ -355,7 +413,7 @@ if(visibleCount){
  const recent=state.waste.slice(-visibleCount);
  recent.forEach((c,i)=>{
    const front=i===recent.length-1;
-   const card=cardElement(c,()=>{if(front)select('w',0)},0,front&&pick?.zone==='w',!front);
+   const card=cardElement(c,()=>{if(front)tapCard('w',0,state.waste.length-1)},0,front&&pick?.zone==='w',!front);
    if(state.drawCount===3){
      card.classList.add('waste-fan');
      card.style.setProperty('--waste-shift',(i-(recent.length-1)/2)*8+'px');
@@ -372,14 +430,24 @@ const cw=Math.min(640,root.parentElement.clientWidth-10)/7-5,openStep=Math.max(2
 for(let col=0;col<7;col++){
 const place=document.createElement('div');place.className='column'+(state.t[col].length?'':' empty');place.dataset.col=col;place.tabIndex=0;place.setAttribute('aria-label','Στήλη '+(col+1));place.addEventListener('click',()=>select('t',col));
 place.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();select('t',col);}});
-let y=0;state.t[col].forEach((c,i)=>{const chosen=pick?.zone==='t'&&pick.col===col&&i>=pick.index;const btn=cardElement(c,()=>select('t',col,i),y,chosen,!c.up);btn.style.zIndex=String(i+1);place.appendChild(btn);y+=c.up?openStep:downStep;});
+let y=0;state.t[col].forEach((c,i)=>{const chosen=pick?.zone==='t'&&pick.col===col&&i>=pick.index;const btn=cardElement(c,()=>tapCard('t',col,i),y,chosen,!c.up);btn.style.zIndex=String(i+1);place.appendChild(btn);y+=c.up?openStep:downStep;});
 place.style.minHeight=Math.max(400,y+cw*1.5)+'px';root.appendChild(place);
 }
 }
 function hint(){for(const zone of ['w','t']){for(let col=0;col<(zone==='w'?1:7);col++){const a=zone==='w'?state.waste:state.t[col],i=a.length-1;if(i<0||!a[i].up)continue;const p={zone,col,index:i};if(validMove(p,'f',a[i].s)){say('💡 '+lab(a[i])+' → βάση '+S[a[i].s]);return;}}}
 for(let src=0;src<7;src++)for(let i=0;i<state.t[src].length;i++){const p={zone:'t',col:src,index:i};if(!validSequence(pickedCards(p)))continue;for(let dst=0;dst<7;dst++)if(dst!==src&&validMove(p,'t',dst)){say('💡 '+lab(state.t[src][i])+' → στήλη '+(dst+1));return;}}
 if(state.stock.length||state.waste.length)say('💡 Τράβηξε κάρτα από την τράπουλα.');else say('Δεν βρέθηκε διαθέσιμη κίνηση.');}
-function autoFoundation(){let changed=false;for(let tries=0;tries<52;tries++){let found=false;for(const zone of ['w','t']){for(let col=0;col<(zone==='w'?1:7);col++){const a=zone==='w'?state.waste:state.t[col],i=a.length-1;if(i>=0&&a[i].up&&validMove({zone,col,index:i},'f',a[i].s)){move({zone,col,index:i},'f',a[i].s);found=changed=true;break;}}if(found)break;}if(!found)break;}say(changed?'Μεταφέρθηκαν οι διαθέσιμες κάρτες στις βάσεις.':'Δεν υπάρχουν κάρτες για αυτόματη μεταφορά.');}
+function autoFoundation(){
+ if(state.done)return;
+ const before=state.f.reduce((n,pile)=>n+pile.length,0);
+ snapshot();
+ // The explicit Bases button also releases the player's temporary hold.
+ state.manualFoundationCards=[];
+ const moved=autoToFoundation();
+ if(moved){winIfComplete();draw();save();}
+ else {undo.pop();draw();save();}
+ say(moved?'Μεταφέρθηκαν '+moved+' φύλλα στις βάσεις.':'Δεν υπάρχουν διαθέσιμα φύλλα για τις βάσεις.');
+}
 function chooseDrawMode(n){
  if(state.done)return;
  if(n!==1&&n!==3)return;
@@ -397,21 +465,19 @@ $('newSide').addEventListener('click',()=>$('new').click());
 $('undo').addEventListener('click',()=>{const old=undo.pop();if(!old)return;state=old.state;elapsed=old.elapsed;since=active&&!state.done?Date.now():0;pick=null;say('Η τελευταία κίνηση αναιρέθηκε.');draw();save();});
 $('hint').addEventListener('click',hint);$('auto').addEventListener('click',autoFoundation);
 $('waste').addEventListener('click',()=>select('w',0));for(let i=0;i<4;i++){$('f'+i).addEventListener('click',()=>select('f',i));}
-$('tableau').addEventListener('dblclick',e=>{let card=e.target.closest('.card');if(!card)return;});
-$('waste').addEventListener('dblclick',()=>{if(state.waste.length)toFoundation('w',0,state.waste.length-1)});
-for(let i=0;i<7;i++){} // Tableau double-tap uses click selection then Bases button.
+// A timestamp-based second tap works even though cards are recreated after the first tap.
 window.addEventListener('resize',()=>draw());
 function visibility(){active=document.visibilityState==='visible'&&embeddedActive;if(active)resume();else pause()}
 let embeddedActive=true;window.addEventListener('message',e=>{if(e.origin!==location.origin)return;if(e.data?.type==='solitairefunny:visibility'){embeddedActive=!!e.data.active;visibility();}});
 document.addEventListener('visibilitychange',visibility);
-try{const saved=JSON.parse(localStorage.getItem(KEY)||'null');if(saved?.state&&saved.state.t?.length===7&&saved.state.f?.length===4){state=saved.state;state.drawCount=state.drawCount===3?3:1;elapsed=Number(saved.elapsed)||0;resume();say('Η αποθηκευμένη παρτίδα συνεχίζεται.');draw();}else newGame();}catch(_){newGame();}
+try{const saved=JSON.parse(localStorage.getItem(KEY)||'null');if(saved?.state&&saved.state.t?.length===7&&saved.state.f?.length===4){state=saved.state;state.drawCount=state.drawCount===3?3:1;state.manualFoundationCards=Array.isArray(state.manualFoundationCards)?state.manualFoundationCards:[];elapsed=Number(saved.elapsed)||0;resume();autoToFoundation();say('Η αποθηκευμένη παρτίδα συνεχίζεται.');draw();save();}else newGame();}catch(_){newGame();}
 setInterval(()=>{if(since&&active&&!state.done){$('clock').textContent=format(now());if(Math.floor(now()/1000)%8===0)save();}},400);
 })();
 </script>
 <!-- Ενιαίος οδηγός παιχνιδιού μέσα στις ρυθμίσεις -->
 <script>
 (()=>{
-const rules=["Στόχος: μετέφερε όλες τις κάρτες στις τέσσερις βάσεις, από άσο μέχρι ρήγα, ανά χρώμα/σύμβολο.","Στις επτά στήλες τοποθετείς κάρτες σε φθίνουσα σειρά με εναλλαγή κόκκινου και μαύρου.","Σε άδεια στήλη μπορεί να μπει μόνο ρήγας ή ακολουθία που ξεκινά από ρήγα.","Αποκάλυπτε τις κλειστές κάρτες μετακινώντας τις ανοιχτές. Τράβα από την τράπουλα όταν δεν υπάρχει χρήσιμη κίνηση.","Στις βάσεις μπαίνουν πρώτα οι άσοι, μετά τα 2, 3 κ.ο.κ. του ίδιου συμβόλου. Κερδίζεις όταν συμπληρωθούν και οι τέσσερις."];
+const rules=["Στόχος: μετέφερε όλες τις κάρτες στις τέσσερις βάσεις, από άσο μέχρι ρήγα, ανά χρώμα/σύμβολο.","Στις επτά στήλες τοποθετείς κάρτες σε φθίνουσα σειρά με εναλλαγή κόκκινου και μαύρου.","Σε άδεια στήλη μπορεί να μπει μόνο ρήγας ή ακολουθία που ξεκινά από ρήγα.","Αποκάλυπτε τις κλειστές κάρτες μετακινώντας τις ανοιχτές. Τράβα από την τράπουλα όταν δεν υπάρχει χρήσιμη κίνηση.","Στις βάσεις μπαίνουν πρώτα οι άσοι, μετά τα 2, 3 κ.ο.κ. του ίδιου συμβόλου. Τα διαθέσιμα φύλλα ανεβαίνουν αυτόματα. Με διπλό ταπ σε φύλλο μπορείς επίσης να το στείλεις στη βάση. Μπορείς να κατεβάσεις φύλλο από τη βάση σε στήλη με το χέρι. Κερδίζεις όταν συμπληρωθούν και οι τέσσερις."];
 const style=document.createElement('style');style.textContent=`.funny-help-overlay{position:fixed;inset:0;z-index:2147483640;background:#020b19dc;display:flex;align-items:center;justify-content:center;padding:16px}.funny-help-overlay[hidden]{display:none!important}.funny-help-card{width:min(460px,100%);max-height:85dvh;overflow:auto;background:linear-gradient(155deg,#15395b,#091a30);color:#edf8ff;border:1px solid #68b9ed;border-radius:18px;padding:20px;box-shadow:0 15px 50px #0009;font:14px/1.55 system-ui,sans-serif}.funny-help-card h2{font-size:20px;margin:0 0 12px;text-align:center}.funny-help-card ol{padding-left:24px}.funny-help-card li{margin-bottom:10px}.funny-help-btn{background:#17486d;color:#e8f7ff;border:1px solid #67b9e6;border-radius:10px;padding:9px 12px;cursor:pointer;font:600 13px system-ui,sans-serif}.funny-help-close{display:block;width:100%;margin-top:12px}.funny-help-gear{position:absolute;right:12px;top:12px;font-size:22px}.funny-help-host{position:relative}
 @media(orientation:portrait) and (max-width:650px){
  .funny-help-overlay{
