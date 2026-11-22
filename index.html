@@ -149,6 +149,26 @@ body>.suite-game-banner{width:min(calc(100% - 24px),720px);margin:12px auto 10px
  .top .slot .card{left:3%;width:94%;border-radius:8px}
  .game{padding-inline:7px}
 
+
+ /* Mobile compact cards v5: physically ~60x84 CSS pixels, rather than
+    cards nearly as wide as each column (~100x96). Remain centered. */
+ .column .card{
+   left:50%!important;width:min(68%,60px)!important;
+   height:84px!important;max-height:84px!important;
+   aspect-ratio:auto!important;
+   transform:translateX(-50%);padding:3px 3px!important;
+ }
+ .top{height:64px!important}
+ .top .slot{height:64px!important}
+ .top .slot .card{
+   left:50%!important;width:min(70%,60px)!important;
+   height:64px!important;max-height:64px!important;
+   aspect-ratio:auto!important;transform:translateX(-50%);
+ }
+ .column .card .rank,.top .card .rank{font-size:14px!important}
+ .column .card .suit,.top .card .suit{font-size:13px!important}
+ .column .card .big,.top .card .big{font-size:19px!important}
+ .column .card.selected{transform:translateX(-50%)}
  .game-dialog-cover{position:fixed;top:0;left:100vw;right:auto;bottom:auto;
    width:100dvh;height:100vw;transform-origin:top left;transform:rotate(90deg)}
 }
