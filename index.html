@@ -196,13 +196,52 @@ body>.suite-game-banner{width:min(calc(100% - 24px),720px);margin:12px auto 10px
  .columns,.column{min-height:160px!important}
 }
 
+
+/* Landscape-in-portrait control deck, occupying only the unused right side
+   of the compact seven-column card field. */
+.game{position:relative}
+.solitaire-deck{display:none}
+.draw-mode-toolbar{display:inline-flex;align-items:center;gap:5px}
+.draw-mode-toolbar .btn[aria-pressed="true"]{background:#267fb6;border-color:#8bdfff}
+@media(orientation:portrait) and (max-width:650px){
+ .draw-mode-toolbar{display:none}
+ .solitaire-deck{
+   display:flex;position:absolute;left:475px;top:9px;
+   width:calc(100% - 485px);max-width:320px;min-width:0;
+   flex-direction:column;align-items:stretch;gap:9px;
+   color:#e6f4ff;z-index:1;
+ }
+ .solitaire-deck h2{margin:0;font-size:15px;text-align:center}
+ .solitaire-deck .progress-caption{font-size:11px;color:#b5d6ed}
+ .solitaire-deck .mode-buttons{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+ .solitaire-deck button{padding:9px 5px;min-height:43px;border:1px solid #4a89bd;
+  border-radius:9px;background:#15395b;color:#edf9ff;font:700 14px system-ui,sans-serif}
+ .solitaire-deck button[aria-pressed="true"]{
+   background:linear-gradient(130deg,#2276ae,#155486);border-color:#8adaff;
+   box-shadow:0 0 0 1px #8adaff4d
+ }
+ .solitaire-deck .track{height:8px;background:#071b30;border-radius:9px;overflow:hidden}
+ .solitaire-deck .track>span{display:block;height:100%;width:0%;
+   border-radius:9px;background:#46afe7;transition:width .15s}
+ .solitaire-deck .progress-row{display:flex;align-items:center;justify-content:space-between;
+   gap:5px;font-size:12px}
+ .solitaire-deck .progress-row strong{font-size:14px;color:#fff}
+ .solitaire-deck .suits{display:flex;justify-content:center;gap:15px;font-size:22px}
+ .solitaire-deck .suits .red{color:#f187a4}
+ .solitaire-deck .info{font-size:10px;line-height:1.4;color:#afcde1;text-align:center}
+}
+@media(orientation:portrait) and (max-width:650px) and (max-height:720px){
+ .solitaire-deck{gap:5px}
+ .solitaire-deck button{min-height:35px;padding:5px}
+ .solitaire-deck h2{font-size:13px}
+}
 </style>
 </head><body><main class="shell">
 <div class="suite-game-banner"><img src="./hero-banner.svg" width="900" height="300" alt="" aria-hidden="true" decoding="async"></div>
 <header class="hero"><div class="hero-icon">♠ ♥ ♣ ♦</div><h1>SolitaireFunny</h1><p class="sub">Πασιέντζα Klondike · Τράβηγμα 1 κάρτας</p></header>
 <section class="panel">
 <div class="stats"><div class="metric"><small>Χρόνος</small><strong id="clock">00:00</strong></div><div class="metric"><small>Κινήσεις</small><strong id="moves">0</strong></div><div class="metric"><small>Νίκες</small><strong id="wins">0</strong></div></div>
-<div class="tools"><button class="btn primary" id="new">↻ Νέο</button><button class="btn" id="undo">↶ Αναίρεση</button><button class="btn" id="hint">💡 Υπόδειξη</button><button class="btn" id="auto">⇧ Βάσεις</button></div>
+<div class="tools"><button class="btn primary" id="new">↻ Νέο</button><button class="btn" id="undo">↶ Αναίρεση</button><button class="btn" id="hint">💡 Υπόδειξη</button><button class="btn" id="auto">⇧ Βάσεις</button><span class="draw-mode-toolbar"><button type="button" class="btn" data-draw="1" aria-pressed="true">1 φύλλο</button><button type="button" class="btn" data-draw="3" aria-pressed="false">3 φύλλα</button></span></div>
 <p id="msg" class="msg" role="status" aria-live="polite">Διάλεξε κάρτα και μετά τη θέση που θέλεις να τη βάλεις.</p>
 <div class="game" id="game">
 <div class="top">
@@ -213,7 +252,16 @@ body>.suite-game-banner{width:min(calc(100% - 24px),720px);margin:12px auto 10px
 <div class="slot foundation" id="f1" data-zone="f" data-col="1" role="button" tabindex="0" data-suit="♦" aria-label="Βάση καρό"></div>
 <div class="slot foundation" id="f2" data-zone="f" data-col="2" role="button" tabindex="0" data-suit="♣" aria-label="Βάση σπαθιά"></div>
 <div class="slot foundation" id="f3" data-zone="f" data-col="3" role="button" tabindex="0" data-suit="♠" aria-label="Βάση μπαστούνια"></div>
-</div><div class="columns" id="tableau"></div></div>
+</div><div class="columns" id="tableau"></div><aside class="solitaire-deck" aria-label="Πρόοδος και τράβηγμα φύλλων">
+<h2>♠ Πρόοδος παρτίδας</h2>
+<div class="progress-row"><span>Κάρτες στις βάσεις</span><strong class="foundation-count">0/52</strong></div>
+<div class="track" aria-hidden="true"><span class="foundation-progress"></span></div>
+<div class="progress-row"><span>Στην τράπουλα</span><strong class="stock-count">24</strong></div>
+<div class="suits" aria-hidden="true"><span class="red">♥ ♦</span><span>♣ ♠</span></div>
+<h2>Τράβηγμα φύλλων</h2>
+<div class="mode-buttons"><button type="button" data-draw="1" aria-pressed="true">1 φύλλο</button><button type="button" data-draw="3" aria-pressed="false">3 φύλλα</button></div>
+<div class="info">Η επιλογή αποθηκεύεται μαζί με την παρτίδα.</div>
+</aside></div>
 
 </section></main>
 <script>
@@ -221,7 +269,7 @@ body>.suite-game-banner{width:min(calc(100% - 24px),720px);margin:12px auto 10px
 'use strict';
 const S=['♥','♦','♣','♠'],KEY='solitairefunny:v1',STATS='solitairefunny:stats',$=id=>document.getElementById(id);
 const clone=x=>JSON.parse(JSON.stringify(x)),color=c=>c.s<2?0:1,lab=c=>(c.v===1?'A':c.v===11?'J':c.v===12?'Q':c.v===13?'K':String(c.v))+S[c.s];
-let state,undo=[],pick=null,elapsed=0,since=0,active=true,stats={wins:0,best:null};
+let state,undo=[],pick=null,elapsed=0,since=0,active=true,stats={wins:0,best:null},drawMode=1;
 try{stats=JSON.parse(localStorage.getItem(STATS)||'null')||stats;}catch(_){}
 function format(ms){let n=Math.floor(ms/1000);return String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0')}
 function now(){return elapsed+(since&&active&&!state.done?Date.now()-since:0)}
@@ -233,7 +281,7 @@ function snapshot(){undo.push({state:clone(state),elapsed:now()});if(undo.length
 function newGame(){
 const cards=Array.from({length:52},(_,i)=>({s:Math.floor(i/13),v:i%13+1,up:false}));
 for(let i=51;i>0;i--){const j=Math.floor(Math.random()*(i+1));[cards[i],cards[j]]=[cards[j],cards[i]];}
-state={t:Array.from({length:7},()=>[]),f:[[],[],[],[]],stock:[],waste:[],moves:0,done:false};
+state={t:Array.from({length:7},()=>[]),f:[[],[],[],[]],stock:[],waste:[],moves:0,done:false,drawCount:drawMode};
 for(let col=0;col<7;col++)for(let row=0;row<=col;row++){const c=cards.pop();c.up=row===col;state.t[col].push(c);}
 state.stock=cards;undo=[];elapsed=0;since=0;pick=null;say('Νέα παρτίδα! Επίλεξε κάρτα και μετά έναν προορισμό.');resume();draw();save();
 }
@@ -256,9 +304,13 @@ if(zone==='f'){if(state.f[col].length)choose('f',col,state.f[col].length-1);retu
 if(zone==='t'&&state.t[col].length){const i=index??state.t[col].length-1;if(state.t[col][i].up)choose('t',col,i);return;}
 pick=null;draw();}
 function toFoundation(zone,col,index){const p={zone,col,index};const cards=pickedCards(p);if(cards.length!==1)return false;const target=cards[0].s;return move(p,'f',target)}
-function drawStock(){if(!state.stock.length&&!state.waste.length)return;snapshot();
-if(state.stock.length){const c=state.stock.pop();c.up=true;state.waste.push(c);}
-else {state.stock=state.waste.reverse().map(c=>({...c,up:false}));state.waste=[];}
+function drawStock(){if(state.done||!state.stock.length&&!state.waste.length)return;snapshot();
+if(state.stock.length){
+ const count=state.drawCount===3?3:1;
+ for(let i=0;i<count&&state.stock.length;i++){
+  const c=state.stock.pop();c.up=true;state.waste.push(c);
+ }
+}else {state.stock=state.waste.reverse().map(c=>({...c,up:false}));state.waste=[];}
 state.moves++;pick=null;draw();save();}
 function suitClass(c){return color(c)===0?' red':''}
 function cardElement(c,onClick,top,selected,down=false){
@@ -266,6 +318,14 @@ const el=document.createElement('button');el.type='button';el.className='card'+(
 el.setAttribute('aria-label',c.up?lab(c):'Κρυφή κάρτα');el.innerHTML=c.up?'<span class="rank">'+(c.v===1?'A':c.v===11?'J':c.v===12?'Q':c.v===13?'K':c.v)+'</span><span class="suit">'+S[c.s]+'</span><span class="big">'+S[c.s]+'</span>':'';
 el.addEventListener('click',e=>{e.stopPropagation();onClick()});if(down)el.style.pointerEvents='none';return el;}
 function draw(){
+drawMode=state.drawCount===3?3:1;
+for(const b of document.querySelectorAll('[data-draw]')){
+ b.setAttribute('aria-pressed',String(Number(b.dataset.draw)===drawMode));
+}
+const foundations=state.f.reduce((sum,pile)=>sum+pile.length,0);
+for(const p of document.querySelectorAll('.foundation-count'))p.textContent=foundations+'/52';
+for(const p of document.querySelectorAll('.stock-count'))p.textContent=String(state.stock.length);
+for(const p of document.querySelectorAll('.foundation-progress'))p.style.width=(foundations/52*100)+'%';
 $('clock').textContent=format(now());$('moves').textContent=String(state.moves);$('wins').textContent=String(stats.wins||0);$('undo').disabled=undo.length===0;
 $('draw').classList.toggle('empty',!state.stock.length);$('draw').textContent=state.stock.length?'✦':state.waste.length?'↻':'';
 const waste=$('waste');waste.replaceChildren();if(state.waste.length)waste.appendChild(cardElement(state.waste[state.waste.length-1],()=>select('w',0),0,pick?.zone==='w'));
@@ -283,6 +343,15 @@ function hint(){for(const zone of ['w','t']){for(let col=0;col<(zone==='w'?1:7);
 for(let src=0;src<7;src++)for(let i=0;i<state.t[src].length;i++){const p={zone:'t',col:src,index:i};if(!validSequence(pickedCards(p)))continue;for(let dst=0;dst<7;dst++)if(dst!==src&&validMove(p,'t',dst)){say('💡 '+lab(state.t[src][i])+' → στήλη '+(dst+1));return;}}
 if(state.stock.length||state.waste.length)say('💡 Τράβηξε κάρτα από την τράπουλα.');else say('Δεν βρέθηκε διαθέσιμη κίνηση.');}
 function autoFoundation(){let changed=false;for(let tries=0;tries<52;tries++){let found=false;for(const zone of ['w','t']){for(let col=0;col<(zone==='w'?1:7);col++){const a=zone==='w'?state.waste:state.t[col],i=a.length-1;if(i>=0&&a[i].up&&validMove({zone,col,index:i},'f',a[i].s)){move({zone,col,index:i},'f',a[i].s);found=changed=true;break;}}if(found)break;}if(!found)break;}say(changed?'Μεταφέρθηκαν οι διαθέσιμες κάρτες στις βάσεις.':'Δεν υπάρχουν κάρτες για αυτόματη μεταφορά.');}
+function chooseDrawMode(n){
+ if(state.done)return;
+ if(n!==1&&n!==3)return;
+ state.drawCount=n;drawMode=n;draw();save();
+ say('Τράβηγμα ανά '+n+(n===1?' φύλλο.':' φύλλα.'));
+}
+for(const btn of document.querySelectorAll('[data-draw]')){
+ btn.addEventListener('click',()=>chooseDrawMode(Number(btn.dataset.draw)));
+}
 $('draw').addEventListener('click',drawStock);
 $('new').addEventListener('click',async()=>{if(state.moves&& !state.done&&!await GameDialog.confirm('Νέα παρτίδα; Η τωρινή θα χαθεί.'))return;newGame()});
 $('undo').addEventListener('click',()=>{const old=undo.pop();if(!old)return;state=old.state;elapsed=old.elapsed;since=active&&!state.done?Date.now():0;pick=null;say('Η τελευταία κίνηση αναιρέθηκε.');draw();save();});
@@ -295,7 +364,7 @@ window.addEventListener('resize',()=>draw());
 function visibility(){active=document.visibilityState==='visible'&&embeddedActive;if(active)resume();else pause()}
 let embeddedActive=true;window.addEventListener('message',e=>{if(e.origin!==location.origin)return;if(e.data?.type==='solitairefunny:visibility'){embeddedActive=!!e.data.active;visibility();}});
 document.addEventListener('visibilitychange',visibility);
-try{const saved=JSON.parse(localStorage.getItem(KEY)||'null');if(saved?.state&&saved.state.t?.length===7&&saved.state.f?.length===4){state=saved.state;elapsed=Number(saved.elapsed)||0;resume();say('Η αποθηκευμένη παρτίδα συνεχίζεται.');draw();}else newGame();}catch(_){newGame();}
+try{const saved=JSON.parse(localStorage.getItem(KEY)||'null');if(saved?.state&&saved.state.t?.length===7&&saved.state.f?.length===4){state=saved.state;state.drawCount=state.drawCount===3?3:1;drawMode=state.drawCount;elapsed=Number(saved.elapsed)||0;resume();say('Η αποθηκευμένη παρτίδα συνεχίζεται.');draw();}else newGame();}catch(_){newGame();}
 setInterval(()=>{if(since&&active&&!state.done){$('clock').textContent=format(now());if(Math.floor(now()/1000)%8===0)save();}},400);
 })();
 </script>
